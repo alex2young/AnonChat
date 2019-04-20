@@ -53,7 +53,7 @@ const AppRouter = () => {
     <BrowserRouter>
       <div>
         <Header />
-        <Router />
+        <RouterWithAuth />
       </div>
     </BrowserRouter>
   )
