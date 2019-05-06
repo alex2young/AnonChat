@@ -10,29 +10,28 @@ class Overlay extends React.Component {
   createConversation = async () => {
     this.setState({ creatingConversation: true })
     try {
-      const { username, user: { username: otherUserName }} = this.props
-      const members = [username, otherUserName].sort()
-      const conversationName = members.join(' and ')
+      const { username } = this.props
+      const members = [username].sort()
+      const conversationName = "GLOBAL"
       const convo = { name: conversationName, members }
       const conversation = await API.graphql(graphqlOperation(createConvo, convo))
       const { data: { createConvo: { id: convoLinkConversationId }}} = conversation
       this.props.history.push(`/conversation/${convoLinkConversationId}/${conversationName}`)
       const relation1 = { convoLinkUserId: username, convoLinkConversationId }
-      const relation2 = { convoLinkUserId: otherUserName, convoLinkConversationId }
+
       await API.graphql(graphqlOperation(createConvoLink, relation1))
-      await API.graphql(graphqlOperation(createConvoLink, relation2))
       this.props.history.push(`/conversation/${convoLinkConversationId}/${conversationName}`)
     } catch (err) {
       console.log('error creating conversation...', err)
     }
   }
   render() {
-    const { user: { username } } = this.props
+    const username = "global"
     return (
       <div {...css(styles.container)}>
         <div {...css(styles.content)}>
-          <p {...css(styles.greetingTitle)}>New Conversation</p>
-          <p {...css(styles.greeting)}>Create new conversation with {username}?</p>
+          <p {...css(styles.greetingTitle)}>New Chatroom</p>
+          <p {...css(styles.greeting)}>Create new chatroom ?</p>
           <div {...css(styles.divider)} />
           <div {...css(styles.button)} onClick={this.createConversation}>
             <p {...css(styles.buttonText)}>Yes</p>
