@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "apollo-client": "^2.5.1",
     "aws-amplify": "^1.1.17",
     "aws-amplify-react": "^2.2.4",
     "aws-appsync": "^1.7.0",
     "aws-appsync-react": "^1.2.5",
     "glamor": "^2.20.40",
+    "graphql": "^14.3.0",
     "graphql-tag": "^2.10.0",
     "latlon-geohash": "^1.1.0",
     "mobx": "^5.8.0",

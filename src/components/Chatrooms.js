@@ -7,24 +7,55 @@ import { Link } from "react-router-dom";
 import { FaUser, FaPlus } from "react-icons/fa";
 import UserStore from "../mobx/UserStore";
 import { primary, lightBg } from "../theme";
-import { getUserAndChatrooms } from "../graphql";
+import { getChatrooms, getCurrentPosition } from "../graphql";
 import Overlay from "./Overlay";
+import { getGeohash } from "../geo";
 
 const ChatroomsObserver = observer(
   class Chatrooms extends React.Component {
-    state = { showOverlay: false, userForChat: {} };
+    state = {
+      showOverlay: false,
+      userForChat: {},
+      coords: {},
+      geohash: ""
+    };
     toggleOverlay = (visible, userForChat) => {
       this.setState({ showOverlay: visible, userForChat });
     };
+
+    getLocation = () => {
+      // Get the current position of the user
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          this.setState(prevState => ({
+            coords: position.coords,
+            geohash: "hashvalue" //getGeohash(position.coords)
+          }));
+          console.log(this.state);
+          console.log(this.props);
+
+          this.props.refetch({ geohash: this.state.geohash });
+        },
+        error => this.setState({ forecast: error.message }),
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+      );
+    };
+    constructor(props) {
+      super(props);
+
+      this.getLocation();
+    }
+
     render() {
       const { username } = UserStore;
       let { chatrooms } = this.props;
       chatrooms = chatrooms.map(c => {
-        const chat = c.chatroom.name.split("&");
+        const chat = c.name.split("&");
         const name = chat.find(i => i !== username);
         return { ...c, name };
       });
-      console.log({ convs: chatrooms });
+      //   console.log({ convs: chatrooms });
+      //   console.log(this.props);
       return (
         <div {...css(styles.container)}>
           {this.state.showOverlay && (
@@ -32,6 +63,8 @@ const ChatroomsObserver = observer(
               toggleOverlay={this.toggleOverlay}
               username={username}
               history={this.props.history}
+              coords={this.state.coords}
+              geohash={this.state.geohash}
             />
           )}
           <p {...css(styles.title)}>Chatrooms</p>
@@ -42,7 +75,7 @@ const ChatroomsObserver = observer(
           </div>
           {chatrooms.map((item, i) => (
             <Link
-              to={`chatroom/${item.chatroom.id}/${item.name}`}
+              to={`chatroom/${item.id}/${item.name}`}
               {...css(styles.link)}
               key={i}
             >
@@ -55,6 +88,7 @@ const ChatroomsObserver = observer(
               </div>
             </Link>
           ))}
+          {/* <button onClick={() => this.props.refetch()}>Refresh!</button> */}
         </div>
       );
     }
@@ -62,18 +96,19 @@ const ChatroomsObserver = observer(
 );
 
 const ChatroomsWithData = compose(
-  graphql(getUserAndChatrooms, {
-    options: () => {
+  graphql(getChatrooms, {
+    options: props => {
       return {
         variables: {
-          id: UserStore.username
+          geohash: props.geohash ? props.geohash : "null"
         },
         fetchPolicy: "cache-and-network"
       };
     },
     props: props => {
       return {
-        chatrooms: props.data.getUser ? props.data.getUser.chatrooms.items : []
+        chatrooms: props.data.getChatrooms ? props.data.getChatrooms.items : [],
+        refetch: props.data.refetch
       };
     }
   })
