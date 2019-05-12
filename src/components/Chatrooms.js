@@ -25,7 +25,7 @@ const ChatroomsObserver = observer(
 
     getLocation = () => {
       // Get the current position of the user
-      navigator.geolocation.getCurrentPosition(
+      navigator.geolocation.watchPosition(
         position => {
           this.setState(prevState => ({
             coords: position.coords,
