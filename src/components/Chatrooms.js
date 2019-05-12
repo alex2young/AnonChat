@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { FaUser, FaPlus } from "react-icons/fa";
 import UserStore from "../mobx/UserStore";
 import { primary, lightBg } from "../theme";
-import { getChatrooms, getCurrentPosition } from "../graphql";
+import { getChatrooms } from "../graphql";
 import Overlay from "./Overlay";
 import { getGeohash } from "../geo";
 
@@ -17,7 +17,8 @@ const ChatroomsObserver = observer(
       showOverlay: false,
       userForChat: {},
       coords: {},
-      geohash: ""
+      geohash: "",
+      watch_id: 1
     };
     toggleOverlay = (visible, userForChat) => {
       this.setState({ showOverlay: visible, userForChat });
@@ -25,11 +26,11 @@ const ChatroomsObserver = observer(
 
     getLocation = () => {
       // Get the current position of the user
-      navigator.geolocation.watchPosition(
+      let watch_id = navigator.geolocation.watchPosition(
         position => {
           this.setState(prevState => ({
             coords: position.coords,
-            geohash: "hashvalue" //getGeohash(position.coords)
+            geohash: getGeohash(position.coords)
           }));
           console.log(this.state);
           console.log(this.props);
@@ -37,13 +38,20 @@ const ChatroomsObserver = observer(
           this.props.refetch({ geohash: this.state.geohash });
         },
         error => this.setState({ forecast: error.message }),
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 100 }
       );
+      this.setState({ watch_id });
     };
     constructor(props) {
       super(props);
+    }
 
+    componentWillMount() {
       this.getLocation();
+    }
+
+    componentWillUnmount() {
+      navigator.geolocation.clearWatch(this.state.watch_id);
     }
 
     render() {

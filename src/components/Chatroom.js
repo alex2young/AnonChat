@@ -7,7 +7,7 @@ import uuid from "uuid/v4";
 
 import UserStore from "../mobx/UserStore";
 import {
-  getChat,
+  getChatroom,
   createMessage as CreateMessage,
   onCreateMessage as OnCreateMessage
 } from "../graphql";
@@ -18,6 +18,7 @@ class Chatroom extends React.Component {
   };
   componentDidMount() {
     this.scrollToBottom();
+    console.log("subscribe...");
     this.props.subscribeToNewMessages();
   }
   scrollToBottom = () => {
@@ -31,15 +32,17 @@ class Chatroom extends React.Component {
       return;
     }
     if (this.state.message === "") return;
-    const { username } = UserStore;
+    const { username, nickname } = UserStore;
     const { chatroomId } = this.props.match.params;
     const message = {
       id: uuid(),
       createdAt: Date.now(),
       messageChatroomId: chatroomId,
       content: this.state.message,
-      authorId: username
+      authorId: username,
+      authorNickname: nickname
     };
+    console.log(message);
     this.props.createMessage(message);
     this.setState({ message: "" });
   };
@@ -60,19 +63,28 @@ class Chatroom extends React.Component {
             return (
               <div
                 key={i}
-                {...css([
-                  styles.message,
-                  checkSenderForMessageStyle(username, m)
-                ])}
+                {...css(
+                  [styles.messageContainer],
+                  checkSenderForMessageContainerStyle(username, m)
+                )}
               >
-                <p
+                {checkSenderForAuthor(username, m)}
+                <div
+                  key={i}
                   {...css([
-                    styles.messageText,
-                    checkSenderForTextStyle(username, m)
+                    styles.message,
+                    checkSenderForMessageStyle(username, m)
                   ])}
                 >
-                  {m.content}
-                </p>
+                  <p
+                    {...css([
+                      styles.messageText,
+                      checkSenderForTextStyle(username, m)
+                    ])}
+                  >
+                    {m.content}
+                  </p>
+                </div>
               </div>
             );
           })}
@@ -93,14 +105,34 @@ class Chatroom extends React.Component {
   }
 }
 
+function checkSenderForAuthor(username, message, prev_message) {
+  if (username === message.authorId) {
+    return <div {...css([styles.author, styles.authorMe])}>me</div>;
+  } else {
+    return (
+      <div {...css([styles.author, styles.authorOthers])}>
+        {message.authorNickname ? message.authorNickname : "real human"}
+      </div>
+    );
+  }
+}
+
+function checkSenderForMessageContainerStyle(username, message) {
+  if (username === message.authorId) {
+    return { justifyContent: "flex-end" };
+  } else {
+    return {};
+  }
+}
+
 function checkSenderForMessageStyle(username, message) {
   if (username === message.authorId) {
     return {
       backgroundColor: "#1b86ff",
-      marginLeft: 50
+      marginRight: 10
     };
   } else {
-    return { marginRight: 50 };
+    return { marginLeft: 10 };
   }
 }
 
@@ -127,15 +159,39 @@ const styles = {
     float: "left",
     clear: "both"
   },
+  author: {
+    display: "inline-block",
+    position: "absolute",
+    top: 0,
+    fontSize: 14,
+    color: "#444444"
+  },
+  authorOthers: {
+    left: 15
+  },
+  authorMe: {
+    right: 15
+  },
   messagesContainer: {
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
     height: "calc(100vh - 219px)",
     overflow: "scroll"
   },
+  messageContainer: {
+    position: "relative",
+    display: "flex",
+    flexWrap: "wrap"
+  },
   message: {
+    maxWidth: "60%",
     backgroundColor: "#ededed",
     borderRadius: 10,
     margin: 10,
-    padding: 20
+    padding: 10,
+    marginTop: 20,
+    marginBottom: 0
   },
   messageText: {
     margin: 0
@@ -159,7 +215,7 @@ const styles = {
 };
 
 const ChatroomWithData = compose(
-  graphql(getChat, {
+  graphql(getChatroom, {
     options: props => {
       const { chatroomId } = props.match.params;
       return {
@@ -171,9 +227,13 @@ const ChatroomWithData = compose(
     },
     props: props => {
       const { chatroomId } = props.ownProps.match.params;
-      let messages = props.data.getChat
-        ? props.data.getChat.messages.items
+      console.log(props);
+      let messages = props.data.getChatroom
+        ? props.data.getChatroom.messages
+          ? props.data.getChatroom.messages.items
+          : []
         : [];
+
       return {
         messages,
         data: props.data,
@@ -189,17 +249,17 @@ const ChatroomWithData = compose(
                 }
               }
             ) => {
-              let messageArray = prev.getChat.messages.items.filter(
+              let messageArray = prev.getChatroom.messages.items.filter(
                 message => message.id !== onCreateMessage.id
               );
               messageArray = [...messageArray, onCreateMessage];
 
               return {
                 ...prev,
-                getChat: {
-                  ...prev.getChat,
+                getChatroom: {
+                  ...prev.getChatroom,
                   messages: {
-                    ...prev.getChat.messages,
+                    ...prev.getChatroom.messages,
                     items: messageArray
                   }
                 }
@@ -215,17 +275,17 @@ const ChatroomWithData = compose(
       const { chatroomId } = props.match.params;
       return {
         update: (dataProxy, { data: { createMessage } }) => {
-          const query = getChat;
+          const query = getChatroom;
           const data = dataProxy.readQuery({
             query,
             variables: { id: chatroomId }
           });
 
-          data.getChat.messages.items = data.getChat.messages.items.filter(
+          data.getChatroom.messages.items = data.getChatroom.messages.items.filter(
             m => m.id !== createMessage.id
           );
 
-          data.getChat.messages.items.push(createMessage);
+          data.getChatroom.messages.items.push(createMessage);
 
           dataProxy.writeQuery({
             query,

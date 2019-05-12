@@ -10,7 +10,7 @@ class Overlay extends React.Component {
   onChange = e => {
     this.setState({ [e.target.name]: e.target.value });
   };
-  createConversation = async () => {
+  createChatroom = async () => {
     this.setState({ creatingChatroom: true });
     try {
       const { geohash } = this.props;
@@ -42,18 +42,20 @@ class Overlay extends React.Component {
           <p {...css(styles.greetingTitle)}>New Chatroom</p>
           <p {...css(styles.greeting)}>Create new chatroom ?</p>
           <div {...css(styles.divider)} />
-          <div>
+          <p {...css(styles.greeting)}>
             At {latitude}, {longitude}
-          </div>
-          <div>
+          </p>
+          <div {...css(styles.divider)} />
+          <div {...css(styles.chatroomNameContainer)}>
             <input
+              {...css(styles.chatroomName)}
               placeholder="Chatroom name"
               name="chatroomName"
               onChange={this.onChange}
               value={this.state.chatroomName}
             />
           </div>
-          <div {...css(styles.button)} onClick={this.createConversation}>
+          <div {...css(styles.button)} onClick={this.createChatroom}>
             <p {...css(styles.buttonText)}>Yes</p>
           </div>
           <div
@@ -123,5 +125,18 @@ const styles = {
     height: "calc(100vh - 360px)",
     flex: 1,
     justifyContent: "center"
+  },
+  chatroomName: {
+    padding: 15,
+    margin: 10,
+    marginTop: 0,
+    height: 45,
+    outline: "none",
+    border: "2px solid #ededed",
+    margin: 5,
+    borderRadius: 30,
+    padding: "0px 20px",
+    fontSize: 18,
+    width: "calc(100% - 54px)"
   }
 };
