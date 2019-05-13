@@ -4,8 +4,10 @@ import { compose, graphql } from "react-apollo";
 import { observer } from "mobx-react";
 import { css } from "glamor";
 import uuid from "uuid/v4";
-
+import { API, graphqlOperation } from "aws-amplify";
 import UserStore from "../mobx/UserStore";
+import { createChatLink, deleteChatLink } from "../graphql";
+
 import {
   getChatroom,
   createMessage as CreateMessage,
@@ -14,9 +16,36 @@ import {
 
 class Chatroom extends React.Component {
   state = {
-    message: ""
+    message: "",
+    chatLinkId: null
   };
+
+  addLink = async () => {
+    const { username } = UserStore;
+    console.log(UserStore.username);
+    const { chatroomId } = this.props.match.params;
+    const link = { chatLinkUserId: username, chatLinkChatroomId: chatroomId };
+    console.log("addlink...");
+    console.log(UserStore);
+    console.log(link);
+    let res = await API.graphql(graphqlOperation(createChatLink, link));
+    let createdLink = res.data.createChatLink;
+    console.log({ created: createdLink });
+    this.setState({ createdLink });
+  };
+
+  deleteChatLink = async () => {
+    const { createdLink } = this.state;
+    await API.graphql(graphqlOperation(deleteChatLink, createdLink));
+  };
+
+  componentWillUnmount() {
+    console.log("unmount chatroom");
+    this.deleteChatLink();
+  }
+
   componentDidMount() {
+    this.addLink();
     this.scrollToBottom();
     console.log("subscribe...");
     this.props.subscribeToNewMessages();

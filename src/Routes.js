@@ -10,7 +10,7 @@ import Footer from "./components/Footer";
 const Routes = () => (
   <div>
     <Switch>
-      <Route path="/" exact component={Chatrooms} />
+      <Route path="/" exact component={props => <Chatrooms {...props} />} />
       {/* <Route path="/users/" component={Users} /> */}
       <Route path="/profile/" component={Profile} />
       <Route path="/chatroom/:chatroomId/:chatroomName" component={Chatroom} />

@@ -1,5 +1,5 @@
-import graphql from 'graphql-tag'
-import gql from 'graphql-tag';
+import graphql from "graphql-tag";
+import gql from "graphql-tag";
 
 // mutations
 const createUser = `
@@ -10,23 +10,36 @@ const createUser = `
       id username createdAt
     }
   }
-`
-
-const createMessage = gql`mutation CreateMessage(
-    $createdAt: String, $id: ID, $authorId: String, $content: String!, $messageConversationId: ID!
-  ) {
-  createMessage(input: {
-    createdAt: $createdAt, id: $id, content: $content, messageConversationId: $messageConversationId, authorId: $authorId
-  }) {
-    id
-    content
-    authorId
-    messageConversationId
-    createdAt
-  }
-}
 `;
 
+const createMessage = gql`
+  mutation CreateMessage(
+    $createdAt: String
+    $id: ID
+    $authorId: String
+    $authorNickname: String
+    $content: String!
+    $messageChatroomId: ID!
+  ) {
+    createMessage(
+      input: {
+        createdAt: $createdAt
+        id: $id
+        content: $content
+        messageChatroomId: $messageChatroomId
+        authorId: $authorId
+        authorNickname: $authorNickname
+      }
+    ) {
+      id
+      content
+      authorId
+      authorNickname
+      messageChatroomId
+      createdAt
+    }
+  }
+`;
 
 const createConvo = `mutation CreateConvo($name: String!, $members: [String!]!) {
   createConvo(input: {
@@ -63,11 +76,11 @@ const getUser = graphql`
       username
     }
   }
-`
+`;
 
 const getUserAndConversations = gql`
-  query getUserAndConversations($id:ID!) {
-    getUser(id:$id) {
+  query getUserAndConversations($id: ID!) {
+    getUser(id: $id) {
       id
       username
       conversations(limit: 100) {
@@ -81,11 +94,11 @@ const getUserAndConversations = gql`
       }
     }
   }
-`
+`;
 
 const getConvo = gql`
   query getConvo($id: ID!) {
-    getConvo(id:$id) {
+    getConvo(id: $id) {
       id
       name
       members
@@ -102,7 +115,7 @@ const getConvo = gql`
       updatedAt
     }
   }
-`
+`;
 
 const listUsers = graphql`
   query listUsers {
@@ -114,25 +127,107 @@ const listUsers = graphql`
       }
     }
   }
-`
+`;
 
 const onCreateMessage = gql`
-  subscription onCreateMessage($messageConversationId: ID!) {
-    onCreateMessage(messageConversationId: $messageConversationId) {
+  subscription onCreateMessage($messageChatroomId: ID!) {
+    onCreateMessage(messageChatroomId: $messageChatroomId) {
       id
       content
       authorId
-      messageConversationId
+      messageChatroomId
       createdAt
     }
   }
-`
+`;
 
-const onCreateUser = gql`subscription OnCreateUser {
-  onCreateUser {
+const onCreateUser = gql`
+  subscription OnCreateUser {
+    onCreateUser {
+      id
+      username
+      createdAt
+    }
+  }
+`;
+
+const getChatrooms = gql`
+  query GetChatrooms($geohash: String!) {
+    getChatrooms(geohash: $geohash) {
+      items {
+        id
+        name
+        geohash
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+const createRoom = `mutation CreateRoom($name: String!, $geohash: String!) {
+	createRoom(input: {
+		geohash: $geohash
+		name: $name
+	}) {
+	  id
+	  messages {
+		nextToken
+	  }
+	  associated {
+		nextToken
+	  }
+	  name
+	  geohash
+	  createdAt
+	  updatedAt
+	}
+  }
+  `;
+
+const getChatroom = gql`
+  query getChatroom($id: ID!) {
+    getChatroom(id: $id) {
+      id
+      name
+      messages(limit: 100) {
+        items {
+          id
+          content
+          authorId
+          authorNickname
+          messageChatroomId
+          createdAt
+        }
+      }
+      createdAt
+      updatedAt
+      geohash
+    }
+  }
+`;
+
+const createChatLink = `mutation CreateChatLink(
+    $chatLinkChatroomId: ID!, $chatLinkUserId: ID
+  ) {
+  createChatLink(input: {
+    chatroomId: $chatLinkChatroomId, userId: $chatLinkUserId
+  }) {
     id
-    username
-    createdAt
+    userId
+    chatroomId
+  }
+}
+`;
+
+const deleteChatLink = `mutation deleteChatLink(
+    $id: ID, $chatroomId: ID
+  ) {
+  deleteChatLink(input: {
+	id: $id
+	chatroomId: $chatroomId
+  }) {
+    id
   }
 }
 `;
@@ -147,5 +242,10 @@ export {
   getUserAndConversations,
   listUsers,
   onCreateMessage,
-  onCreateUser
-}
+  onCreateUser,
+  getChatrooms,
+  getChatroom,
+  createRoom,
+  createChatLink,
+  deleteChatLink
+};

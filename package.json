@@ -8,6 +8,7 @@
     "aws-amplify-react": "^2.2.4",
     "aws-appsync": "^1.7.0",
     "aws-appsync-react": "^1.2.5",
+    "deploy-aws-s3-cloudfront": "^1.0.0",
     "glamor": "^2.20.40",
     "graphql": "^14.3.0",
     "graphql-tag": "^2.10.0",
@@ -26,7 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "deploy-aws-s3-cloudfront --bucket anonchat-s3-bucket --source=./build/ --distribution E15COKBO0Q2FEU"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -35,7 +35,6 @@ class Overlay extends React.Component {
   };
   render() {
     const { latitude, longitude } = this.props.coords;
-    const username = "global";
     return (
       <div {...css(styles.container)}>
         <div {...css(styles.content)}>

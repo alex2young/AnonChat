@@ -9,52 +9,20 @@ import UserStore from "../mobx/UserStore";
 import { primary, lightBg } from "../theme";
 import { getChatrooms } from "../graphql";
 import Overlay from "./Overlay";
-import { getGeohash } from "../geo";
+import { getGeohash, GeoContext } from "../geo";
 
 const ChatroomsObserver = observer(
   class Chatrooms extends React.Component {
     state = {
       showOverlay: false,
-      userForChat: {},
-      coords: {},
-      geohash: "",
-      watch_id: 1
+      userForChat: {}
     };
     toggleOverlay = (visible, userForChat) => {
       this.setState({ showOverlay: visible, userForChat });
     };
 
-    getLocation = () => {
-      // Get the current position of the user
-      let watch_id = navigator.geolocation.watchPosition(
-        position => {
-          this.setState(prevState => ({
-            coords: position.coords,
-            geohash: getGeohash(position.coords)
-          }));
-          console.log(this.state);
-          console.log(this.props);
-
-          this.props.refetch({ geohash: this.state.geohash });
-        },
-        error => this.setState({ forecast: error.message }),
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 100 }
-      );
-      this.setState({ watch_id });
-    };
-    constructor(props) {
-      super(props);
-    }
-
-    componentWillMount() {
-      this.getLocation();
-    }
-
-    componentWillUnmount() {
-      navigator.geolocation.clearWatch(this.state.watch_id);
-    }
-
     render() {
+      console.log(this.props);
       const { username } = UserStore;
       let { chatrooms } = this.props;
       chatrooms = chatrooms.map(c => {
@@ -161,4 +129,17 @@ const styles = {
   }
 };
 
-export default observer(ChatroomsWithData);
+const ChatroomsWithDataAndGeo = React.forwardRef((props, ref) => (
+  <GeoContext.Consumer>
+    {({ coords, geohash }) => (
+      <ChatroomsWithData
+        {...props}
+        coords={coords}
+        geohash={geohash}
+        ref={ref}
+      />
+    )}
+  </GeoContext.Consumer>
+));
+
+export default observer(ChatroomsWithDataAndGeo);
