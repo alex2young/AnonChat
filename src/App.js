@@ -5,10 +5,15 @@ import Router from "./Router";
 import { GeoContext, getGeohash } from "./geo";
 
 class App extends Component {
+  toggleOverlay = visible => {
+    this.setState({ showOverlay: visible });
+  };
   state = {
     coords: {},
-    geohash: "",
-    watch_id: 1
+    geohash: "dr72j",
+    watch_id: 1,
+    showOverlay: false,
+    toggleOverlay: this.toggleOverlay
   };
 
   watchLocation = () => {
@@ -16,18 +21,19 @@ class App extends Component {
     console.log("start watch on App");
     let watch_id = navigator.geolocation.watchPosition(
       position => {
+        let newGeoHash = getGeohash(position.coords);
         this.setState(prevState => ({
           coords: position.coords,
-          geohash: getGeohash(position.coords)
+          geohash: newGeoHash
         }));
         //   console.log(this.props);
-        console.log("fetched gps from App");
+        console.log("fetched new gps from App, new geohash = " + newGeoHash);
         // this.props.refetch({ geohash: this.state.geohash });
       },
       error => {
         console.log(error.message);
       },
-      { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 }
+      { enableHighAccuracy: true, timeout: 2000 }
     );
     this.setState({ watch_id });
   };

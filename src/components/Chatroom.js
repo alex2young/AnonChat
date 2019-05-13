@@ -22,15 +22,10 @@ class Chatroom extends React.Component {
 
   addLink = async () => {
     const { username } = UserStore;
-    console.log(UserStore.username);
     const { chatroomId } = this.props.match.params;
     const link = { chatLinkUserId: username, chatLinkChatroomId: chatroomId };
-    console.log("addlink...");
-    console.log(UserStore);
-    console.log(link);
     let res = await API.graphql(graphqlOperation(createChatLink, link));
     let createdLink = res.data.createChatLink;
-    console.log({ created: createdLink });
     this.setState({ createdLink });
   };
 

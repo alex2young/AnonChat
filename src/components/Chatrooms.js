@@ -21,8 +21,12 @@ const ChatroomsObserver = observer(
       this.setState({ showOverlay: visible, userForChat });
     };
 
+    componentDidMount() {
+      this.props.refetch({ geohash: this.props.geohash });
+      console.log("refetch with geohash = " + this.props.geohash);
+    }
+
     render() {
-      console.log(this.props);
       const { username } = UserStore;
       let { chatrooms } = this.props;
       chatrooms = chatrooms.map(c => {
@@ -34,17 +38,17 @@ const ChatroomsObserver = observer(
       //   console.log(this.props);
       return (
         <div {...css(styles.container)}>
-          {this.state.showOverlay && (
+          {this.props.showOverlay && (
             <Overlay
-              toggleOverlay={this.toggleOverlay}
+              toggleOverlay={this.props.toggleOverlay}
               username={username}
               history={this.props.history}
-              coords={this.state.coords}
-              geohash={this.state.geohash}
+              coords={this.props.coords}
+              geohash={this.props.geohash}
             />
           )}
           <p {...css(styles.title)}>Chatrooms</p>
-          <div onClick={() => this.toggleOverlay(true)}>
+          <div onClick={() => this.props.toggleOverlay(true)}>
             <div {...css(styles.plusIconContainer)}>
               <FaPlus />
             </div>
@@ -78,7 +82,7 @@ const ChatroomsWithData = compose(
         variables: {
           geohash: props.geohash ? props.geohash : "null"
         },
-        fetchPolicy: "cache-and-network"
+        fetchPolicy: "network"
       };
     },
     props: props => {
@@ -131,11 +135,13 @@ const styles = {
 
 const ChatroomsWithDataAndGeo = React.forwardRef((props, ref) => (
   <GeoContext.Consumer>
-    {({ coords, geohash }) => (
+    {({ coords, geohash, showOverlay, toggleOverlay }) => (
       <ChatroomsWithData
         {...props}
         coords={coords}
         geohash={geohash}
+        showOverlay={showOverlay}
+        toggleOverlay={toggleOverlay}
         ref={ref}
       />
     )}
