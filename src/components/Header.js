@@ -30,7 +30,7 @@ const styles = {
     width: "100%"
   },
   logo: {
-    height: 34,
+    height: 50,
     paddingLeft: 10
   }
 };
