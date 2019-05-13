@@ -1,6 +1,6 @@
 {
-    "projectName": "chatt",
-    "version": "1.0",
+    "projectName": "AnonChat",
+    "version": "2.0",
     "frontend": "javascript",
     "javascript": {
         "framework": "react",

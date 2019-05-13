@@ -1,0 +1,14 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "anonchat-20190511102856-authRole",
+            "UnauthRoleArn": "arn:aws:iam::008843985864:role/anonchat-20190511102856-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::008843985864:role/anonchat-20190511102856-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "anonchat-20190511102856-deployment",
+            "UnauthRoleName": "anonchat-20190511102856-unauthRole",
+            "StackName": "anonchat-20190511102856",
+            "StackId": "arn:aws:cloudformation:us-east-2:008843985864:stack/anonchat-20190511102856/1fea23c0-73f9-11e9-9718-027d76990372"
+        }
+    }
+}

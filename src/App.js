@@ -10,7 +10,7 @@ class App extends Component {
   };
   state = {
     coords: {},
-    geohash: "dr72j",
+    geohash: "dr72",
     watch_id: 1,
     showOverlay: false,
     toggleOverlay: this.toggleOverlay
